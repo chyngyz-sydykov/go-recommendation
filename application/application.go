@@ -1,20 +1,22 @@
 package application
 
 import (
+	"fmt"
 	"log"
-	"time"
 
 	"github.com/chyngyz-sydykov/go-recommendation/application/handlers"
 	"github.com/chyngyz-sydykov/go-recommendation/infrastructure/config"
 	"github.com/chyngyz-sydykov/go-recommendation/infrastructure/db"
 	"github.com/chyngyz-sydykov/go-recommendation/infrastructure/logger"
 	"github.com/chyngyz-sydykov/go-recommendation/infrastructure/messagebroker"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"github.com/chyngyz-sydykov/go-recommendation/internal/recommendation"
 	"gorm.io/gorm"
 )
 
 type App struct {
+	RecommendationHandler *handlers.RecommendationHandler
+	DB                    *gorm.DB
+	MessageBrokerConsumer messagebroker.MessageBrokerConsumerInterface
 }
 
 func InitializeApplication() *App {
@@ -24,54 +26,47 @@ func InitializeApplication() *App {
 	}
 
 	db := initializeDatabase()
-	//defer db.Close()
 
-	rabbitMqPublisher := initializeRabbitMqPublisher(config)
-	//defer rabbitMqPublisher.Close()
+	consumer := InitializeRabbitMqConsumer(config)
+
+	recommendationService := recommendation.NewRecommendationService(db)
 
 	logger := logger.NewLogger()
 	commonHandler := handlers.NewCommonHandler(logger)
 
-	ratingClient := initializeRatingGrpcClient()
-	ratingService := rating.NewRatingService(ratingClient, time.Duration(config.GrpcTimeoutDuration)*time.Second)
-	ratingHandler := handlers.NewRatingHandler(ratingService, *commonHandler)
-
-	bookService := book.NewBookService(db, rabbitMqPublisher, ratingService)
-	bookHandler := handlers.NewBookHandler(*bookService, *commonHandler)
-
+	recommendationHandler := handlers.NewRecommendationHandler(commonHandler, consumer, recommendationService)
 	app := &App{
-		BookHandler:   *bookHandler,
-		RatingHandler: *ratingHandler,
+		RecommendationHandler: recommendationHandler,
+		DB:                    db,
+		MessageBrokerConsumer: consumer,
 	}
 	return app
 }
-
-func initializeRatingGrpcClient() pb.RatingServiceClient {
-	config, err := config.LoadConfig()
-	if err != nil {
-		log.Fatalf("Could not config: %v", err)
-	}
-
-	conn, err := grpc.NewClient(config.RatingServiceServer+":"+config.RatingServicePort, grpc.WithTransportCredentials(insecure.NewCredentials()))
-
-	if err != nil {
-		log.Fatalf("Failed to connect to gRPC server: %v", err)
-	}
-	//defer conn.Close()
-
-	// Create the gRPC client for the RatingService.
-	ratingClient := pb.NewRatingServiceClient(conn)
-	return ratingClient
+func (app *App) Start() {
+	app.RecommendationHandler.ProcessMessages()
 }
-func initializeRabbitMqPublisher(config *config.Config) messagebroker.MessageBrokerInterface {
-	rabbitMQURL := "amqp://" + config.RabbitMqUser + ":" + config.RabbitMqPassword + "@" + config.RabbitMqContainerName + ":5672/"
-	publisher, err := messagebroker.NewRabbitMQPublisher(rabbitMQURL, config.RabbitMqQueueName)
+func (app *App) ShutDown() {
 
+	fmt.Println("Application exited gracefully.")
+	app.MessageBrokerConsumer.Close()
+
+	db, err := app.DB.DB()
+	if err != nil {
+		log.Fatalf("Failed to get database instance: %v", err)
+	}
+	if db != nil {
+		db.Close()
+	}
+}
+
+func InitializeRabbitMqConsumer(config *config.Config) messagebroker.MessageBrokerConsumerInterface {
+	rabbitMQURL := "amqp://" + config.RabbitMqUser + ":" + config.RabbitMqPassword + "@" + config.RabbitMqContainerName + ":5672/"
+	consumer, err := messagebroker.NewRabbitMQConsumer(rabbitMQURL, config.RabbitMqQueueName)
 	if err != nil {
 		log.Fatalf("Failed to initialize message publisher: %v", err)
 	}
-	publisher.InitializeMessageBroker()
-	return publisher
+
+	return consumer
 }
 
 func initializeDatabase() *gorm.DB {

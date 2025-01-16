@@ -41,7 +41,6 @@ func LoadConfig() (*Config, error) {
 		ApplicationEnvironment: getEnv("APPLICATION_ENVIRONMENT", "local"),
 		RatingServiceServer:    getEnv("RATING_SERVICE_SERVER", "localhost"),
 		RatingServicePort:      getEnv("RATING_SERVICE_PORT", "1112"),
-		GrpcTimeoutDuration:    getIntEnv("GRPC_TIMEOUT_DURATION", 30),
 		RabbitMqUser:           getEnv("RABBITMQ_USER", "guest"),
 		RabbitMqPassword:       getEnv("RABBITMQ_PASSWORD", "guest"),
 		RabbitMqQueueName:      getEnv("RABBITMQ_QUEUE_NAME", "queue-name"),

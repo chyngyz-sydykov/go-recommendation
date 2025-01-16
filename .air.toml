@@ -2,7 +2,7 @@
 
 # Build settings
 [build]
-cmd = "go build -mod=readonly -o ./bin/main ./cmd/restApi"
+cmd = "go build -mod=readonly -o ./bin/main ./cmd/worker"
 bin = "bin/main"
 full_bin = "./bin/main"
 
@@ -18,4 +18,4 @@ extensions = ["go"]
 # Watch settings
 [log]
 # Make sure log level allows for output
-#level = "debug" # Options: debug, info, warn, error
+#level = "" # Options: debug, info, warn, error

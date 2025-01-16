@@ -5,18 +5,18 @@ import (
 	"os"
 )
 
-type LoggerInterface interface {
-	LogError(statusCode int, err error)
+type Logger struct {
 }
 
-type Logger struct {
+type LoggerInterface interface {
+	LogError(err error)
 }
 
 func NewLogger() *Logger {
 	return &Logger{}
 }
 
-func (logger *Logger) LogError(statusCode int, err error) {
+func (l *Logger) LogError(err error) {
 	errorLog := log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime)
-	errorLog.Printf("status code: %d, error: %s", statusCode, err.Error())
+	errorLog.Printf("error: %s", err.Error())
 }

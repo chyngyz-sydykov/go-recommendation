@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/chyngyz-sydykov/go-web/infrastructure/config"
-	"github.com/chyngyz-sydykov/go-web/infrastructure/db/models"
+	"github.com/chyngyz-sydykov/go-recommendation/infrastructure/config"
+	"github.com/chyngyz-sydykov/go-recommendation/infrastructure/db/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -30,7 +30,7 @@ func InitializeDatabase(dbConfig *config.DBConfig) (*gorm.DB, error) {
 }
 
 func Migrate() {
-	err := db.AutoMigrate(&models.Author{}, &models.Book{})
+	err := db.AutoMigrate(&models.Recommendation{})
 	if err != nil {
 		log.Fatal("failed to run migration:", err)
 	}
