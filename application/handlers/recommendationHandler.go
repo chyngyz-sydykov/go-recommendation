@@ -39,7 +39,7 @@ func (handler *RecommendationHandler) ProcessMessages() error {
 			continue
 		}
 		recommendation := &recommendation.RecommendationDTO{
-			BookId: int(bookMessage.ID),
+			BookId: bookMessage.ID,
 			Points: 1,
 		}
 

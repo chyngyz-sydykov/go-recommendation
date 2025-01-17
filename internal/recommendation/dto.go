@@ -11,7 +11,7 @@ type RecommendationDTO struct {
 }
 
 type BookMessage struct {
-	ID       uint      `json:"id"`
+	ID       int       `json:"id"`
 	Title    string    `json:"title"`
 	ICBN     string    `json:"icbn"`
 	EditedAt time.Time `json:"EditedAt"`

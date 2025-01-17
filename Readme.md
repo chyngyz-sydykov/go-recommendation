@@ -4,9 +4,12 @@
 # About the project
 
 This is a one of the microservices for personal pet project as study practice. the whole system consists of 3 microservices:
- - **go-web** works as an api gateway. the endpoints include CRUD actions for book, create endpoint for saving rating
- - **go-rating** another microservice that saves new rating and return list of rating by book id. the communication between go-web and go-rating is via gRPC [link](https://github.com/chyngyz-sydykov/go-rating)
-- **go-recommendation** (current project) a microservice that holds business logic related with the recommendation of books depending on rating and how often the book is edited or created. the communication will be done via RabbitMQ
+- **go-recommendation** (current project) a microservice that holds business logic related with the recommendation of books. The recommendation algorithm will increase the points for specific book when book is edited or rated. the communication is via RabbitMQ.
+ - **go-web** works as an API gateway. the endpoints include CRUD actions for book, create endpoint for saving rating [link](https://github.com/chyngyz-sydykov/go-web)
+ - **go-rating** another microservice that saves rating and returns list of rating by book id. the communication between go-web and go-rating is via gRPC [link](https://github.com/chyngyz-sydykov/go-rating)
+
+## NOTE:
+Current repo is dependent on [link](https://github.com/chyngyz-sydykov/go-web). go-web microservice has docker container for rabbitmq. while current go-recommendation connects to that instance of message broker.
 
 # Installation
 

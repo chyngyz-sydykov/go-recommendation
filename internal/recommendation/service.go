@@ -1,9 +1,8 @@
 package recommendation
 
 import (
+	"github.com/chyngyz-sydykov/go-recommendation/infrastructure/db"
 	"github.com/chyngyz-sydykov/go-recommendation/infrastructure/db/models"
-
-	"gorm.io/gorm"
 )
 
 type RecommendationServiceInterface interface {
@@ -14,7 +13,7 @@ type RecommendationService struct {
 	repository RecommendationRepository
 }
 
-func NewRecommendationService(db *gorm.DB) *RecommendationService {
+func NewRecommendationService(db db.DatabaseInterface) *RecommendationService {
 	repository := NewRecommendationRepository(db)
 	return &RecommendationService{
 		repository: *repository,
@@ -32,19 +31,3 @@ func (service *RecommendationService) mapToGorm(RecommendationDTO *Recommendatio
 	recommendation.Points = RecommendationDTO.Points
 	return &recommendation
 }
-
-// func (service *RecommendationService) publishMessage(RecommendationDTO *RecommendationDTO, event string) error {
-
-// 	recommendationMessage := recommendationMessage{
-// 		ID:       recommendation.ID,
-// 		Title:    recommendation.Title,
-// 		ICBN:     recommendation.ICBN,
-// 		EditedAt: time.Now(),
-// 		Event:    event,
-// 	}
-
-// 	if err := service.messageBroker.Publish(recommendationMessage); err != nil {
-// 		log.Fatalf("Failed to publish event: %v", err)
-// 	}
-// 	return nil
-// }

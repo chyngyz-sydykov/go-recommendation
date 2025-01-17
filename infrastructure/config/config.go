@@ -21,12 +21,16 @@ type Config struct {
 	RabbitMqContainerName  string
 }
 
-type DBConfig struct {
+type PostgreDBConfig struct {
 	Host     string
 	Port     string
 	Name     string
 	Username string
 	Password string
+}
+type SqLiteDBConfig struct {
+	Path string
+	Name string
 }
 
 func LoadConfig() (*Config, error) {
@@ -49,13 +53,13 @@ func LoadConfig() (*Config, error) {
 	return config, nil
 }
 
-func LoadDBConfig() (*DBConfig, error) {
+func LoadPostgreDBConfig() (*PostgreDBConfig, error) {
 	err := loadEnvFile()
 	if err != nil {
 		return nil, fmt.Errorf("error loading env file")
 	}
 
-	dbConfig := &DBConfig{
+	dbConfig := &PostgreDBConfig{
 		Host:     getEnv("DB_HOST", "localhost"),
 		Port:     getEnv("DB_PORT", "5432"),
 		Name:     getEnv("DB_DATABASE", "database_name"),
@@ -65,6 +69,21 @@ func LoadDBConfig() (*DBConfig, error) {
 
 	return dbConfig, nil
 }
+
+func LoadSqLiteDBConfig() (*SqLiteDBConfig, error) {
+	err := loadEnvFile()
+	if err != nil {
+		return nil, fmt.Errorf("error loading env file")
+	}
+
+	dbConfig := &SqLiteDBConfig{
+		Path: getEnv("SQLITE_PATH", "/app/data"),
+		Name: getEnv("SQLITE_DB_NAME", "tmp.sqlite3"),
+	}
+
+	return dbConfig, nil
+}
+
 func loadEnvFile() error {
 	rootDir := os.Getenv("ROOT_DIR")
 	envFileName := rootDir + "/.env"

@@ -1,23 +1,22 @@
 package recommendation
 
 import (
+	"github.com/chyngyz-sydykov/go-recommendation/infrastructure/db"
 	"github.com/chyngyz-sydykov/go-recommendation/infrastructure/db/models"
-
-	"gorm.io/gorm"
 )
 
-type RecommendationRepositoryInterface interface {
-	Create(recommendation models.Recommendation) error
-}
-
 type RecommendationRepository struct {
-	db *gorm.DB
+	db db.DatabaseInterface
 }
 
-func NewRecommendationRepository(db *gorm.DB) *RecommendationRepository {
+func NewRecommendationRepository(db db.DatabaseInterface) *RecommendationRepository {
 	return &RecommendationRepository{db: db}
 }
 
 func (repository *RecommendationRepository) Create(recommendation *models.Recommendation) error {
-	return repository.db.Create(&recommendation).Error
+	err := repository.db.Create(recommendation)
+	if err != nil {
+		return err
+	}
+	return nil
 }

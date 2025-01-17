@@ -10,26 +10,26 @@ import (
 	"github.com/chyngyz-sydykov/go-recommendation/infrastructure/logger"
 	"github.com/chyngyz-sydykov/go-recommendation/infrastructure/messagebroker"
 	"github.com/chyngyz-sydykov/go-recommendation/internal/recommendation"
-	"gorm.io/gorm"
 )
 
 type App struct {
 	RecommendationHandler *handlers.RecommendationHandler
-	DB                    *gorm.DB
+	DB                    db.DatabaseInterface
 	MessageBrokerConsumer messagebroker.MessageBrokerConsumerInterface
 }
 
 func InitializeApplication() *App {
+	fmt.Println("InitializeApplication")
 	config, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("Could not config: %v", err)
 	}
 
-	db := initializeDatabase()
+	sqlLite := initializeSqlLiteDatabase()
 
 	consumer := InitializeRabbitMqConsumer(config)
 
-	recommendationService := recommendation.NewRecommendationService(db)
+	recommendationService := recommendation.NewRecommendationService(sqlLite)
 
 	logger := logger.NewLogger()
 	commonHandler := handlers.NewCommonHandler(logger)
@@ -37,12 +37,13 @@ func InitializeApplication() *App {
 	recommendationHandler := handlers.NewRecommendationHandler(commonHandler, consumer, recommendationService)
 	app := &App{
 		RecommendationHandler: recommendationHandler,
-		DB:                    db,
+		DB:                    sqlLite,
 		MessageBrokerConsumer: consumer,
 	}
 	return app
 }
 func (app *App) Start() {
+	fmt.Println("Start")
 	app.RecommendationHandler.ProcessMessages()
 }
 func (app *App) ShutDown() {
@@ -50,12 +51,8 @@ func (app *App) ShutDown() {
 	fmt.Println("Application exited gracefully.")
 	app.MessageBrokerConsumer.Close()
 
-	db, err := app.DB.DB()
-	if err != nil {
-		log.Fatalf("Failed to get database instance: %v", err)
-	}
-	if db != nil {
-		db.Close()
+	if app.DB != nil {
+		app.DB.Close()
 	}
 }
 
@@ -69,16 +66,17 @@ func InitializeRabbitMqConsumer(config *config.Config) messagebroker.MessageBrok
 	return consumer
 }
 
-func initializeDatabase() *gorm.DB {
-	dbConfig, err := config.LoadDBConfig()
+func initializeSqlLiteDatabase() db.DatabaseInterface {
+	fmt.Println("initializeSqlLiteDatabase")
+	dbConfig, err := config.LoadSqLiteDBConfig()
 	if err != nil {
 		log.Fatalf("Could not load database config: %v", err)
 	}
-	dbInstance, err := db.InitializeDatabase(dbConfig)
+	sqlLite, err := db.InitializeSqlLite(dbConfig)
 	if err != nil {
 		log.Fatalf("Coult not initialize db connection %v", err)
 	}
-	db.Migrate()
-	return dbInstance
+	sqlLite.Migrate()
+	return sqlLite
 
 }

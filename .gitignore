@@ -3,5 +3,5 @@
 /.vscode
 /tmp
 /coverage
-
+/sqlite-data
 .env

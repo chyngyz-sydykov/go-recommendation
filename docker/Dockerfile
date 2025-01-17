@@ -2,8 +2,11 @@
 FROM golang:1.23-alpine
 
 # Install dependencies
-RUN apk add --no-cache git bash postgresql-client
+RUN apk add --no-cache git bash sqlite sqlite-dev gcc musl-dev 
 RUN go env -w GOFLAGS=-buildvcs=false
+ENV CGO_ENABLED=1
+ENV GOOS=linux
+ENV GOARCH=amd64
 
 WORKDIR /app
 
