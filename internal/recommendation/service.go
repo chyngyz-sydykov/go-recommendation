@@ -6,23 +6,40 @@ import (
 )
 
 type RecommendationServiceInterface interface {
-	Create(recommendation *RecommendationDTO) error
+	ProcessMessage(recommendation *RecommendationDTO) error
 }
 
 type RecommendationService struct {
 	repository RecommendationRepository
+	calculator PointCalculator
 }
 
 func NewRecommendationService(db db.DatabaseInterface) *RecommendationService {
 	repository := NewRecommendationRepository(db)
+	calculator := NewPointCalculator()
 	return &RecommendationService{
 		repository: *repository,
+		calculator: *calculator,
 	}
 }
 
-func (service *RecommendationService) Create(RecommendationDTO *RecommendationDTO) error {
+func (service *RecommendationService) ProcessMessage(RecommendationDTO *RecommendationDTO) error {
+	err := service.assignPointByEventName(RecommendationDTO)
+	if err != nil {
+		return err
+	}
 	recommendation := service.mapToGorm(RecommendationDTO)
-	return service.repository.Create(recommendation)
+	return service.repository.Upsert(recommendation)
+}
+
+func (service *RecommendationService) assignPointByEventName(RecommendationDTO *RecommendationDTO) error {
+	points, err := service.calculator.GetPoint(RecommendationDTO.Event)
+	if err != nil {
+		return err
+	}
+
+	RecommendationDTO.Points = points
+	return nil
 }
 
 func (service *RecommendationService) mapToGorm(RecommendationDTO *RecommendationDTO) *models.Recommendation {

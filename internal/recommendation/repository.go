@@ -13,8 +13,8 @@ func NewRecommendationRepository(db db.DatabaseInterface) *RecommendationReposit
 	return &RecommendationRepository{db: db}
 }
 
-func (repository *RecommendationRepository) Create(recommendation *models.Recommendation) error {
-	err := repository.db.Create(recommendation)
+func (repository *RecommendationRepository) Upsert(recommendation *models.Recommendation) error {
+	err := repository.db.Upsert(recommendation)
 	if err != nil {
 		return err
 	}

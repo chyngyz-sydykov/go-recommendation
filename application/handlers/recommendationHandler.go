@@ -39,11 +39,11 @@ func (handler *RecommendationHandler) ProcessMessages() error {
 			continue
 		}
 		recommendation := &recommendation.RecommendationDTO{
-			BookId: bookMessage.ID,
-			Points: 1,
+			BookId: bookMessage.BookId,
+			Event:  bookMessage.Event,
 		}
 
-		err = handler.service.Create(recommendation)
+		err = handler.service.ProcessMessage(recommendation)
 		if err != nil {
 			tempError := fmt.Errorf("failed to create recommendation: %w", err)
 			handler.commonHandler.HandleError(tempError)

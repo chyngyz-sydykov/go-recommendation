@@ -6,6 +6,6 @@ import (
 
 type Recommendation struct {
 	gorm.Model
-	BookId int `gorm:"index"`
+	BookId int `gorm:"uniqueIndex"`
 	Points int
 }

@@ -36,13 +36,7 @@ func (sqlite *Postgres) Migrate() {
 	log.Println("Migration completed successfully.")
 }
 
-func (sqlite *Postgres) Create(recommendation any) error {
-	err := sqlite.db.AutoMigrate(&models.Recommendation{})
-	if err != nil {
-		log.Fatal("failed to run migration:", err)
-		return err
-	}
-	log.Println("Migration completed successfully.")
+func (sqlite *Postgres) Upsert(recommendation *models.Recommendation) error {
 	return nil
 }
 

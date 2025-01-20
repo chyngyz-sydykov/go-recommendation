@@ -8,6 +8,7 @@ import (
 	"github.com/chyngyz-sydykov/go-recommendation/infrastructure/db/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type SqlLite struct {
@@ -16,9 +17,6 @@ type SqlLite struct {
 
 func InitializeSqlLite(dbConfig *config.SqLiteDBConfig) (DatabaseInterface, error) {
 	fullPath := fmt.Sprintf("%s/%s", dbConfig.Path, dbConfig.Name)
-
-	fmt.Println("fullPath", fullPath)
-
 	db, err := gorm.Open(sqlite.Open(fullPath), &gorm.Config{})
 	if err != nil {
 		log.Fatal("failed to connect database:", err)
@@ -35,13 +33,29 @@ func (sqlite *SqlLite) Migrate() {
 	log.Println("Migration completed successfully.")
 }
 
-func (sqlite *SqlLite) Create(recommendation any) error {
-	err := sqlite.db.Create(recommendation).Error
+func (sqlite *SqlLite) Upsert(recommendation *models.Recommendation) error {
+	err := sqlite.db.Transaction(func(tx *gorm.DB) error {
+		// Use Clauses for upsert
+		err := tx.Clauses(clause.OnConflict{
+			Columns: []clause.Column{{Name: "book_id"}}, // Conflict on `book_id`
+			DoUpdates: clause.Assignments(map[string]interface{}{
+				"points": gorm.Expr("points + ?", recommendation.Points), // Increment points
+			}),
+		}).Create(&recommendation).Error
+
+		if err != nil {
+			return err
+		}
+
+		return nil // Commit transaction
+	})
+
 	if err != nil {
-		log.Fatal("failed to run migration:", err)
 		return err
 	}
-	log.Println("Created successfully.")
+	return nil
+}
+func (sqlite *SqlLite) Update(book *models.Recommendation, payload models.Recommendation) error {
 	return nil
 }
 
