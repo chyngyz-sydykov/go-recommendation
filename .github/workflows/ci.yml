@@ -40,13 +40,6 @@ jobs:
           echo "RabbitMQ is not ready yet. Retrying in 5 seconds..."
           sleep 5
         done
-    - name: Create RabbitMQ Queue
-      run: |
-        apt-get update && apt-get install -y curl
-        curl -u guest:guest -X PUT -H "Content-Type: application/json" \
-          -d '{"durable":true}' \
-          http://localhost:15672/api/queues/%2F/recommendation-queue-test
-
     - name: Test and code coverage
       env:
         APP_ENV: test
