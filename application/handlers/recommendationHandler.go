@@ -11,10 +11,10 @@ import (
 type RecommendationHandler struct {
 	service               recommendation.RecommendationServiceInterface
 	MessageBrokerConsumer messagebroker.MessageBrokerConsumerInterface
-	commonHandler         CommonHandler
+	commonHandler         CommonHandlerInterface
 }
 
-func NewRecommendationHandler(commonHandler CommonHandler, consumer messagebroker.MessageBrokerConsumerInterface, service recommendation.RecommendationServiceInterface) *RecommendationHandler {
+func NewRecommendationHandler(commonHandler CommonHandlerInterface, consumer messagebroker.MessageBrokerConsumerInterface, service recommendation.RecommendationServiceInterface) *RecommendationHandler {
 	return &RecommendationHandler{
 		service:               service,
 		MessageBrokerConsumer: consumer,
@@ -27,6 +27,7 @@ func (handler *RecommendationHandler) ProcessMessages() error {
 	if err != nil {
 		tempError := fmt.Errorf("failed to start consuming messages: %w", err)
 		handler.commonHandler.HandleError(tempError)
+		return tempError
 	}
 	for msg := range msgs {
 		fmt.Printf("Message: %s\n", msg.Body)

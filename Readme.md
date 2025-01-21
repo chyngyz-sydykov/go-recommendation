@@ -26,9 +26,9 @@ run tests `APP_ENV=test go test ./tests/`
 
 run tests without cache `go test -count=1 ./tests/`
 
-run tests within docker (preferred way) `docker exec -it go_rest_api bash -c "APP_ENV=test go test -count=1 ./tests"`
+run tests within docker (preferred way) `docker exec -it go_recommendation_consumer bash -c "APP_ENV=test go test -count=1 ./tests"`
 
-run test coverage on local machine `docker exec -it go_rest_api bash "scripts/coverage.sh"`
+run test coverage on local machine `docker exec -it go_recommendation_consumer bash "scripts/coverage.sh"`
 `go tool cover -html=coverage/filtered_coverage.out`
 
 # Handy commands

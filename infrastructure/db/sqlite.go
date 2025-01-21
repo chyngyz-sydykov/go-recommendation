@@ -35,7 +35,6 @@ func (sqlite *SqlLite) Migrate() {
 
 func (sqlite *SqlLite) Upsert(recommendation *models.Recommendation) error {
 	err := sqlite.db.Transaction(func(tx *gorm.DB) error {
-		// Use Clauses for upsert
 		err := tx.Clauses(clause.OnConflict{
 			Columns: []clause.Column{{Name: "book_id"}}, // Conflict on `book_id`
 			DoUpdates: clause.Assignments(map[string]interface{}{

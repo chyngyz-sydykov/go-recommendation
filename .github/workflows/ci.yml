@@ -1,0 +1,37 @@
+name: Run Tests
+
+on: push
+
+jobs:
+
+  tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v4
+      with:
+        go-version: '1.23.x'
+
+    - name: Install dependencies
+      run: go mod download
+    
+    - name: Set up SQLite database
+      run: |
+        mkdir -p data
+        touch data/go_recommendation_test.sqlite3
+    
+    - name: Test and code coverage
+      env:
+        APP_ENV: test
+        ROOT_DIR: /home/runner/work/go-recommendation/go-recommendation
+        SQLITE_PATH: /home/runner/work/go-recommendation/go-recommendation/data
+        SQLITE_DB_NAME: go_recommendation_test.sqlite3
+      run: |
+        go test -v ./tests
+        chmod +x scripts/coverage.sh
+        scripts/coverage.sh
+    - name: Update coverage report
+      uses: ncruces/go-coverage-report@v0
+      with:
+        coverage-file: coverage/filtered_coverage.out
