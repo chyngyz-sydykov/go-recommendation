@@ -60,7 +60,7 @@ func InitializeRabbitMqConsumer(config *config.Config, logger logger.LoggerInter
 	rabbitMQURL := "amqp://" + config.RabbitMqUser + ":" + config.RabbitMqPassword + "@" + config.RabbitMqContainerName + ":5672/"
 	consumer, err := messagebroker.NewRabbitMQConsumer(rabbitMQURL, config.RabbitMqQueueName)
 	if err != nil {
-		err = fmt.Errorf("failed to initialize message publisher: %v", err)
+		err = fmt.Errorf("failed to initialize message consumer: %v", err)
 		logger.LogError(err)
 	}
 
