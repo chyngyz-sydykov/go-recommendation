@@ -19,19 +19,19 @@ type App struct {
 }
 
 func InitializeApplication() *App {
-	fmt.Println("InitializeApplication")
 	config, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("Could not config: %v", err)
 	}
 
+	logger := logger.NewLogger()
+
 	sqlLite := initializeSqlLiteDatabase()
 
-	consumer := InitializeRabbitMqConsumer(config)
+	consumer := InitializeRabbitMqConsumer(config, logger)
 
 	recommendationService := recommendation.NewRecommendationService(sqlLite)
 
-	logger := logger.NewLogger()
 	commonHandler := handlers.NewCommonHandler(logger)
 
 	recommendationHandler := handlers.NewRecommendationHandler(commonHandler, consumer, recommendationService)
@@ -56,11 +56,12 @@ func (app *App) ShutDown() {
 	}
 }
 
-func InitializeRabbitMqConsumer(config *config.Config) messagebroker.MessageBrokerConsumerInterface {
+func InitializeRabbitMqConsumer(config *config.Config, logger logger.LoggerInterface) messagebroker.MessageBrokerConsumerInterface {
 	rabbitMQURL := "amqp://" + config.RabbitMqUser + ":" + config.RabbitMqPassword + "@" + config.RabbitMqContainerName + ":5672/"
 	consumer, err := messagebroker.NewRabbitMQConsumer(rabbitMQURL, config.RabbitMqQueueName)
 	if err != nil {
-		log.Fatalf("Failed to initialize message publisher: %v", err)
+		err = fmt.Errorf("failed to initialize message publisher: %v", err)
+		logger.LogError(err)
 	}
 
 	return consumer

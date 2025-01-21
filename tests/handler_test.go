@@ -76,6 +76,14 @@ func (m *CommonHandlerMock) HandleError(err error) {
 	m.Called(err)
 }
 
+type LoggerMock struct {
+	mock.Mock
+}
+
+func (m *LoggerMock) LogError(err error) {
+	m.Called(err)
+}
+
 func provideDependencies(suite *IntegrationSuite, consumerMock messagebroker.MessageBrokerConsumerInterface, commonHandler handlers.CommonHandlerInterface) *application.App {
 
 	recommendationService := recommendation.NewRecommendationService(suite.db)

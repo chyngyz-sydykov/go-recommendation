@@ -43,7 +43,6 @@ func (handler *RecommendationHandler) ProcessMessages() error {
 			BookId: bookMessage.BookId,
 			Event:  bookMessage.Event,
 		}
-
 		err = handler.service.ProcessMessage(recommendation)
 		if err != nil {
 			tempError := fmt.Errorf("failed to create recommendation: %w", err)
