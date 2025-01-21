@@ -43,6 +43,7 @@ jobs:
     - name: Test and code coverage
       env:
         APP_ENV: test
+        RABBITMQ_CONTAINER_NAME: localhost
         ROOT_DIR: /home/runner/work/go-recommendation/go-recommendation
         SQLITE_PATH: /home/runner/work/go-recommendation/go-recommendation/data
         SQLITE_DB_NAME: go_recommendation_test.sqlite3
