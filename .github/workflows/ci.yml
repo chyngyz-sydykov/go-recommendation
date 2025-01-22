@@ -14,6 +14,9 @@ jobs:
           - 5672:5672
           - 15672:15672
         options: --name rabbitmq
+        env:
+          RABBITMQ_DEFAULT_USER: user
+          RABBITMQ_DEFAULT_PASS: password
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-go@v4
@@ -43,6 +46,8 @@ jobs:
         ROOT_DIR: /home/runner/work/go-recommendation/go-recommendation
         SQLITE_PATH: /home/runner/work/go-recommendation/go-recommendation/data
         SQLITE_DB_NAME: go_recommendation_test.sqlite3
+        RABBITMQ_USER: user
+        RABBITMQ_PASSWORD: password
       run: |
         go test -v ./tests
         chmod +x scripts/coverage.sh
